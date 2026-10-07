@@ -1,6 +1,6 @@
-# TabForge — YouTube → guitar tab
+# TabForge
 
-Paste a YouTube link, get an interactive guitar tab. TabForge downloads the audio,
+Paste a YouTube link, get a guitar tab. TabForge downloads the audio,
 isolates the guitar stem with AI source separation, transcribes the notes, solves
 string/fret positions, and renders the result in the browser with playback, editing,
 and export.
@@ -132,36 +132,9 @@ web/                  Next.js app (API routes + UI)
 docker-compose.yml    postgres · redis · worker · web
 ```
 
-## Honest limits
-
-- **Fast mode skips isolation.** The form's "Skip guitar isolation" checkbox is
-  on by default: the job transcribes the full mix straight after download, which
-  is dramatically faster but lets drums, bass, and vocals add stray notes.
-  Untick it for Demucs separation (much slower, cleaner tab).
-- **Transcription quality varies.** Clean, guitar-forward songs work best; dense
-  mixes and heavy distortion produce more mistakes. The tab is a starting point —
-  open the .gp file in Guitar Pro (or TuxGuitar) to fix notes.
-- Tempo is estimated once per song; tracks with tempo drift or pickups may be
-  slightly off-grid.
-- Notes crossing bar lines are truncated at the bar line; bends/slides/vibrato are
-  not transcribed (v1 is notes and chords only).
-- CPU separation takes minutes per song. Videos over 10 minutes are rejected.
-
 ## Legal note
 
 Downloading audio from YouTube may violate YouTube's Terms of Service. TabForge is
 intended for personal, educational use on content you have the right to process;
 tabs are stored privately per job and are not published or shared. Running this as
 a public service requires your own legal review.
-
-## Environment variables
-
-| Variable | Default | Used by |
-| --- | --- | --- |
-| `DATABASE_URL` | `postgresql://tabforge:tabforge@localhost:5432/tabforge` | web, worker |
-| `REDIS_URL` | `redis://localhost:6379/0` | web, worker |
-| `QUEUE_KEY` | `tabforge:queue` | web, worker |
-| `DATA_DIR` | `data` | web, worker (shared artifact volume) |
-| `TABFORGE_MAX_SECONDS` | `600` | worker (max video length) |
-| `TABFORGE_WARM_SEPARATION` | `1` | worker (pre-load Demucs at startup; `0` skips it) |
-| `TABFORGE_DEMUCS_JOBS` | `2` | worker (concurrent Demucs CPU chunks) |
