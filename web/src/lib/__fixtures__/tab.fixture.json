@@ -1,0 +1,75 @@
+{
+  "title": "Arpeggio",
+  "artist": "Test",
+  "bpm": 120,
+  "tuning": [
+    40,
+    45,
+    50,
+    55,
+    59,
+    64
+  ],
+  "capo": 0,
+  "beatsPerMeasure": 4,
+  "beatValue": 4,
+  "maxFret": 24,
+  "droppedNotes": 0,
+  "chords": [
+    {
+      "start": 12,
+      "end": 30,
+      "name": "E/B"
+    }
+  ],
+  "notes": [
+    {
+      "start": 0,
+      "duration": 4,
+      "pitch": 40,
+      "string": 6,
+      "fret": 0,
+      "amplitude": 0.8
+    },
+    {
+      "start": 4,
+      "duration": 4,
+      "pitch": 47,
+      "string": 5,
+      "fret": 2,
+      "amplitude": 0.8
+    },
+    {
+      "start": 8,
+      "duration": 4,
+      "pitch": 52,
+      "string": 4,
+      "fret": 2,
+      "amplitude": 0.8
+    },
+    {
+      "start": 12,
+      "duration": 4,
+      "pitch": 56,
+      "string": 3,
+      "fret": 1,
+      "amplitude": 0.8
+    },
+    {
+      "start": 16,
+      "duration": 4,
+      "pitch": 59,
+      "string": 2,
+      "fret": 0,
+      "amplitude": 0.8
+    },
+    {
+      "start": 20,
+      "duration": 10,
+      "pitch": 64,
+      "string": 1,
+      "fret": 0,
+      "amplitude": 0.8
+    }
+  ]
+}
