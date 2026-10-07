@@ -1,0 +1,112 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: tabforge
+      POSTGRES_PASSWORD: tabforge
+      POSTGRES_DB: tabforge
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./schema.sql:/docker-entrypoint-initdb.d/schema.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tabforge -d tabforge"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  worker:
+    build:
+      context: .
+      dockerfile: worker/Dockerfile
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://tabforge:tabforge@postgres:5432/tabforge
+      REDIS_URL: redis://redis:6379/0
+      DATA_DIR: /data
+      TABFORGE_MAX_SECONDS: "600"
+      # Demucs chunks can be processed concurrently on CPU. 2 jobs × 2 Torch
+      # threads suits a 4-vCPU Colima VM; raise jobs only if memory allows.
+      TABFORGE_DEMUCS_JOBS: "2"
+      # Overridable for machines with different CPU/RAM budgets:
+      # TABFORGE_DEMUCS_JOBS: "4"
+      # TABFORGE_TORCH_THREADS: "1"
+      # The job form defaults to skipping Demucs isolation (fast mode), so the
+      # separation model is not pre-loaded at worker startup. Set to "1" (or
+      # remove this line) if you use guitar isolation and want it warm:
+      TABFORGE_WARM_SEPARATION: "0"
+    volumes:
+      - artifacts:/data
+      - modelcache:/root/.cache
+      # Run the checked-out worker source directly: code edits only need
+      # `docker compose restart worker` (or `up -d worker`) instead of a full
+      # image rebuild. Rebuild the image only when dependencies change.
+      - ./worker:/app/worker:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  web:
+    build: ./web
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgresql://tabforge:tabforge@postgres:5432/tabforge
+      REDIS_URL: redis://redis:6379/0
+      DATA_DIR: /data
+    volumes:
+      - artifacts:/data
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  # Hot-reload web dev server (stop prod web first — both use port 3000):
+  #   docker compose stop web && docker compose --profile dev up web-dev
+  web-dev:
+    profiles: ["dev"]
+    build: ./web
+    command:
+      - /bin/sh
+      - -c
+      - >-
+        npm install --no-audit --no-fund &&
+        npm run dev -- -H 0.0.0.0
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgresql://tabforge:tabforge@postgres:5432/tabforge
+      REDIS_URL: redis://redis:6379/0
+      DATA_DIR: /data
+      # Poll for file changes: Colima/virtiofs bind mounts miss some FS events.
+      WATCHPACK_POLLING: "true"
+      CHOKIDAR_USEPOLLING: "true"
+    volumes:
+      - ./web:/app
+      - webdev_node_modules:/app/node_modules
+      - webdev_next:/app/.next
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+volumes:
+  pgdata:
+  artifacts:
+  modelcache:
+  webdev_node_modules:
+  webdev_next:
