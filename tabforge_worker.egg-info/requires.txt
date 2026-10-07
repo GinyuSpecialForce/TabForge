@@ -1,0 +1,14 @@
+numpy>=1.24
+PyGuitarPro>=0.16
+psycopg[binary]>=3.1
+redis>=4.6
+yt-dlp>=2024.4.9
+librosa>=0.10
+soundfile>=0.12
+
+[dev]
+pytest>=7.4
+
+[ml]
+demucs>=4.0
+basic-pitch>=0.4

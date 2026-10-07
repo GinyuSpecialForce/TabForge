@@ -1,0 +1,17 @@
+Metadata-Version: 2.4
+Name: tabforge-worker
+Version: 0.1.0
+Summary: TabForge pipeline: YouTube audio -> guitar tablature (download, separation, transcription, tab solving, GP5/text emit)
+Requires-Python: >=3.9
+Requires-Dist: numpy>=1.24
+Requires-Dist: PyGuitarPro>=0.16
+Requires-Dist: psycopg[binary]>=3.1
+Requires-Dist: redis>=4.6
+Requires-Dist: yt-dlp>=2024.4.9
+Requires-Dist: librosa>=0.10
+Requires-Dist: soundfile>=0.12
+Provides-Extra: ml
+Requires-Dist: demucs>=4.0; extra == "ml"
+Requires-Dist: basic-pitch>=0.4; extra == "ml"
+Provides-Extra: dev
+Requires-Dist: pytest>=7.4; extra == "dev"
