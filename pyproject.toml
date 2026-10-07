@@ -1,0 +1,40 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tabforge-worker"
+version = "0.1.0"
+description = "TabForge pipeline: YouTube audio -> guitar tablature (download, separation, transcription, tab solving, GP5/text emit)"
+requires-python = ">=3.9"
+dependencies = [
+    # <2: tflite-runtime (basic-pitch's backend) ships wheels compiled
+    # against the NumPy 1.x C API -- under NumPy 2 the model load dies with
+    # "AttributeError: _ARRAY_API not found".
+    "numpy>=1.24,<2",
+    "PyGuitarPro>=0.10.1",  # PyPI tops out at 0.10.1; tests run against this
+    "psycopg[binary]>=3.1",
+    "redis>=4.6",
+    "yt-dlp>=2024.4.9",
+    "librosa>=0.10",
+    "soundfile>=0.12",
+]
+
+[project.optional-dependencies]
+# Heavy ML stack; only needed for the full pipeline (separation + transcription).
+ml = [
+    "demucs>=4.0",
+    "basic-pitch>=0.4",
+]
+dev = [
+    "pytest>=7.4",
+]
+
+[project.scripts]
+tabforge = "worker.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["worker*"]
+
+[tool.pytest.ini_options]
+testpaths = ["worker/tests"]
